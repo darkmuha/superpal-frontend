@@ -13,11 +13,13 @@ class CommonLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(),
-      body: body,
-      bottomNavigationBar: CustomBottomNavigationBar(
-        selectedIndex: selectedIndex,
+    return SafeArea(
+      child: Scaffold(
+        appBar: CustomAppBar(),
+        body: body,
+        bottomNavigationBar: CustomBottomNavigationBar(
+          selectedIndex: selectedIndex,
+        ),
       ),
     );
   }

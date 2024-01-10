@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
-  Size get preferredSize => Size.fromHeight(120.0);
+  Size get preferredSize => Size.fromHeight(80.0);
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +12,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       toolbarHeight: preferredSize.height,
       backgroundColor: Colors.transparent,
-      elevation: 0.0, // Remove shadow
+      elevation: 0.0,
+      // Remove shadow
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(20.0),
@@ -25,9 +26,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              icon: SvgPicture.asset('assets/icons/arrow_left.svg', color: Colors.white),
+              icon: SvgPicture.asset('assets/icons/arrow_left.svg',
+                  color: Colors.white),
               onPressed: () {
-                  // Use Navigator.pop to navigate back
+                // Use Navigator.pop to navigate back
                 Get.back();
               },
             ),
@@ -40,7 +42,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   fontWeight: FontWeight.bold),
             ),
             IconButton(
-              icon: SvgPicture.asset('assets/icons/account.svg', color: Colors.white),
+              icon: SvgPicture.asset('assets/icons/account.svg',
+                  color: Colors.white),
               onPressed: () {
                 Get.toNamed('/account');
               },

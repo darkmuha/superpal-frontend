@@ -6,6 +6,7 @@ import 'screens/nutrition.dart';
 import 'screens/ranking.dart';
 import 'screens/superpal.dart';
 import 'screens/workout.dart';
+import 'screens/welcome.dart';
 
 void main() {
   runApp(const MyApp());
@@ -25,12 +26,17 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.black,
       ),
-      initialRoute: '/home',
+      initialRoute: '/',
       getPages: [
+        GetPage(
+          name: '/',
+          page: () => const WelcomeScreen(),
+          transition: Transition.fadeIn,
+        ),
         GetPage(
           name: '/home',
           page: () => const HomeScreen(),
-          transition: Transition.fade,
+          transition: Transition.fadeIn,
         ),
         GetPage(
           name: '/account',
