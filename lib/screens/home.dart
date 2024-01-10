@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:superpal/components/bottom_navigation_bar.dart';
+import '../components/common_layout.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
+    return const CommonLayout(
+      selectedIndex: 0,
+      body: Center(
+        child: Text(
           'Home Screen',
-          style: TextStyle(color: Colors.red)
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
