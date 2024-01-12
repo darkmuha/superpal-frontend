@@ -42,7 +42,12 @@ dependencies:
   jwt_decoder:
   flutter_secure_storage:
   dio:
-
+  image_picker:
+  geolocator:
+  permission_handler:
+  geocoding:
+  cloudinary:
+  image:
 
 dev_dependencies:
   flutter_test:

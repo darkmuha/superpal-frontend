@@ -7,11 +7,10 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      child: const Column(
         children: [
           CustomAppBar(),
-          const Expanded(
+          Expanded(
             child: Center(
               child: Text(
                 'Account Screen',

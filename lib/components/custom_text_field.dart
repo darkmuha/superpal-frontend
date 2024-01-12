@@ -4,12 +4,14 @@ class CustomTextField extends StatelessWidget {
   final controller;
   final String hintText;
   final bool obscureText;
+  final double fontSize;
 
   const CustomTextField({
     super.key,
     required this.controller,
     required this.hintText,
-    required this.obscureText,
+    this.obscureText = false,
+    this.fontSize = 19.0,
   });
 
   @override
@@ -29,9 +31,10 @@ class CustomTextField extends StatelessWidget {
         enabledBorder: const UnderlineInputBorder(
           borderSide: BorderSide(width: 4, color: Color(0xFFCCCCCC)),
         ),
+        contentPadding: const EdgeInsets.only(bottom: -20),
         hintText: hintText,
-        hintStyle: const TextStyle(
-          fontSize: 18,
+        hintStyle: TextStyle(
+          fontSize: fontSize,
           fontFamily: "PayToneOne",
           color: Colors.white,
         ),

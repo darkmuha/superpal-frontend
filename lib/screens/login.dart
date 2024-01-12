@@ -21,6 +21,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
   final FlutterSecureStorage storage = const FlutterSecureStorage();
 
   Future<void> loginUser(BuildContext context) async {
@@ -76,16 +77,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     const SizedBox(height: 220),
                     CustomTextField(
-                        controller: emailController,
-                        hintText: "EMAIL",
-                        obscureText: false),
+                      controller: emailController,
+                      hintText: "EMAIL",
+                    ),
                     const SizedBox(height: 48.5),
                     CustomTextField(
                         controller: passwordController,
                         hintText: "PASSWORD",
                         obscureText: true),
                     const SizedBox(height: 27.5),
-                    CustomButton(onTap: () => loginUser(context)),
+                    CustomButton(
+                        buttonText: 'LOG IN', onTap: () => loginUser(context)),
                   ],
                 ),
               ),

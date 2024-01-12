@@ -4,7 +4,9 @@ import '../components/background_builder.dart';
 import 'package:get/get.dart';
 
 class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({Key? key});
+  const WelcomeScreen({
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -79,6 +81,7 @@ class WelcomeScreen extends StatelessWidget {
 
                           // Register
                           CustomLogoButton(
+                            onTap: () => Get.toNamed('/register'),
                             width: screenWidth * 0.44,
                             icon: const Icon(
                               Icons.person_add,

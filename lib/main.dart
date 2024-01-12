@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:superpal/screens/login.dart';
+import 'package:superpal/screens/register.dart';
 import 'screens/account.dart';
 import 'screens/home.dart';
 import 'screens/nutrition.dart';
@@ -27,7 +28,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.black,
       ),
-      initialRoute: '/',
+      initialRoute: '/home',
       getPages: [
         GetPage(
           name: '/',
@@ -35,8 +36,13 @@ class _MyAppState extends State<MyApp> {
           transition: Transition.fadeIn,
         ),
         GetPage(
+          name: '/register',
+          page: () => RegisterScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
           name: '/login',
-          page: () => LoginScreen(),
+          page: () => const LoginScreen(),
           transition: Transition.fadeIn,
         ),
         GetPage(
