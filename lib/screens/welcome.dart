@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import '../components/custom_logo_button.dart';
+import '../components/background_builder.dart';
+import 'package:get/get.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({Key? key});
@@ -12,26 +14,8 @@ class WelcomeScreen extends StatelessWidget {
       body: SafeArea(
         child: Stack(
           children: [
-            Container(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage(
-                      "assets/images/background_guy_rope_cropped.png"),
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: FractionalOffset.topCenter,
-                  end: FractionalOffset.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withOpacity(0.8),
-                  ],
-                ),
-              ),
+            const BackgroundBuilder(
+              imageUrl: "assets/images/background_guy_rope_cropped.png",
             ),
             Center(
               child: Column(
@@ -44,66 +28,32 @@ class WelcomeScreen extends StatelessWidget {
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 54,
-                      fontFamily: 'PaytoneOne',
+                      fontFamily: 'PayToneOne',
                     ),
                   ),
 
                   const SizedBox(height: 210),
 
                   // Apple Login
-                  Container(
-                    width: screenWidth * 0.9,
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(35),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          "assets/icons/apple_logo.svg",
-                          width: 32,
-                          height: 32,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Sign in With Apple',
-                          style: TextStyle(color: Colors.black, fontSize: 19),
-                        ),
-                      ],
-                    ),
-                  ),
+                  CustomLogoButton(
+                      width: (screenWidth * 0.9),
+                      iconPath: "assets/icons/apple_logo.svg",
+                      buttonText: 'Sign in With Apple',
+                      buttonColor: Colors.white,
+                      textColor: Colors.black,
+                      iconWidth: 32,
+                      iconHeight: 32),
 
                   const SizedBox(height: 7),
 
                   // Facebook Login
-                  Container(
+                  CustomLogoButton(
                     width: screenWidth * 0.9,
-                    padding: const EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF356FE5),
-                      borderRadius: BorderRadius.circular(35),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          "assets/icons/facebook_logo.svg",
-                          width: 24,
-                          height: 24,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Continue',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 19,
-                              fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
+                    iconPath: "assets/icons/facebook_logo.svg",
+                    buttonText: 'Continue',
+                    buttonColor: const Color(0xFF356FE5),
+                    textColor: Colors.white,
+                    iconColor: Colors.white,
                   ),
 
                   const SizedBox(height: 7),
@@ -115,81 +65,55 @@ class WelcomeScreen extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           // Google Sign-In
-                          Container(
+                          CustomLogoButton(
                             width: screenWidth * 0.44,
-                            padding: const EdgeInsets.all(15),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(35),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SvgPicture.asset(
-                                  "assets/icons/google_icon_logo.svg",
-                                  width: 24,
-                                  height: 24,
-                                ),
-                                const SizedBox(width: 8),
-                                const Text(
-                                  'Continue',
-                                  style: TextStyle(
-                                      color: Color(0xFF707070),
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
+                            iconPath: "assets/icons/google_icon_logo.svg",
+                            buttonText: 'Continue',
+                            buttonColor: Colors.white,
+                            textColor: const Color(0xFF707070),
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
                           ),
 
                           const SizedBox(height: 7),
 
                           // Register
-                          Container(
+                          CustomLogoButton(
                             width: screenWidth * 0.44,
-                            padding: const EdgeInsets.all(15),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(35),
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 2.0,
-                              ),
+                            icon: const Icon(
+                              Icons.person_add,
+                              color: Colors.white,
+                              size: 24,
                             ),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.person_add,
-                                  color: Colors.white,
-                                  size: 24,
-                                ),
-                                SizedBox(width: 8),
-                                Text(
-                                  'REGISTER',
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ],
-                            ),
-                          )
+                            buttonText: 'REGISTER',
+                            buttonColor: Colors.transparent,
+                            textColor: Colors.white,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            borderColor: Colors.white,
+                            borderWidth: 2,
+                          ),
                         ],
                       )),
                   const SizedBox(height: 15),
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text('Already have an account?',
-                          style: TextStyle(color: Colors.white, fontSize: 15)),
-                      SizedBox(width: 32),
-                      Text('LOG IN',
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold)),
-                    ],
+                  GestureDetector(
+                    onTap: () {
+                      Get.toNamed('/login');
+                    },
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text('Already have an account?',
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 15)),
+                        SizedBox(width: 32),
+                        Text('LOG IN',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold)),
+                      ],
+                    ),
                   )
                 ],
               ),

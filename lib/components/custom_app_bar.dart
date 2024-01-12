@@ -3,6 +3,15 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final bool showBackButton;
+  final bool showAccountButton;
+
+  const CustomAppBar({
+    Key? key,
+    this.showBackButton = true,
+    this.showAccountButton = true,
+  }) : super(key: key);
+
   @override
   Size get preferredSize => Size.fromHeight(80.0);
 
@@ -13,7 +22,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       toolbarHeight: preferredSize.height,
       backgroundColor: Colors.transparent,
       elevation: 0.0,
-      // Remove shadow
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(20.0),
@@ -25,28 +33,44 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            IconButton(
-              icon: SvgPicture.asset('assets/icons/arrow_left.svg',
-                  color: Colors.white),
-              onPressed: () {
-                // Use Navigator.pop to navigate back
-                Get.back();
+            GestureDetector(
+              onTap: () {
+                if (showBackButton) {
+                  Get.back();
+                }
               },
+              child: Opacity(
+                opacity: showBackButton ? 1.0 : 0.0,
+                child: IconButton(
+                  icon: SvgPicture.asset('assets/icons/arrow_left.svg',
+                      color: Colors.white),
+                  onPressed: null,
+                ),
+              ),
             ),
             const Text(
               "SuperPal",
               style: TextStyle(
-                  fontSize: 31.0,
-                  color: Colors.white,
-                  fontFamily: 'Roboto',
-                  fontWeight: FontWeight.bold),
+                fontSize: 31.0,
+                color: Colors.white,
+                fontFamily: 'PayToneOne',
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            IconButton(
-              icon: SvgPicture.asset('assets/icons/account.svg',
-                  color: Colors.white),
-              onPressed: () {
-                Get.toNamed('/account');
+            GestureDetector(
+              onTap: () {
+                if (showAccountButton) {
+                  Get.toNamed('/account');
+                }
               },
+              child: Opacity(
+                opacity: showAccountButton ? 1.0 : 0.0,
+                child: IconButton(
+                  icon: SvgPicture.asset('assets/icons/account.svg',
+                      color: Colors.white),
+                  onPressed: null, // onPressed is disabled
+                ),
+              ),
             ),
           ],
         ),

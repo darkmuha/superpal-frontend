@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:superpal/screens/login.dart';
 import 'screens/account.dart';
 import 'screens/home.dart';
 import 'screens/nutrition.dart';
@@ -31,6 +32,11 @@ class _MyAppState extends State<MyApp> {
         GetPage(
           name: '/',
           page: () => const WelcomeScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/login',
+          page: () => LoginScreen(),
           transition: Transition.fadeIn,
         ),
         GetPage(
