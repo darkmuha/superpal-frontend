@@ -2,10 +2,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:superpal/helpers/constants.dart';
 
-// Tried creating the apiservice
-// thingy that adds headers but i didn't test it it yet
-// I will work on it last.
-
 class ApiService {
   late Dio _dio;
 
@@ -20,7 +16,6 @@ class ApiService {
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest:
           (RequestOptions options, RequestInterceptorHandler handler) async {
-        // Add token to headers
         const FlutterSecureStorage storage = FlutterSecureStorage();
         String? accessToken = await storage.read(key: 'access');
         if (accessToken != null) {
@@ -28,14 +23,12 @@ class ApiService {
         }
         return handler.next(options);
       },
-      onResponse:
-          (Response response, ResponseInterceptorHandler handler) async {
-        const FlutterSecureStorage storage = FlutterSecureStorage();
-
-        if (response.statusCode == 403) {
-          // Token refresh logic
+      onError: (DioError e, ErrorInterceptorHandler handler) async {
+        if (e.response != null &&
+            (e.response!.statusCode == 403 || e.response!.statusCode == 401)) {
           if (await _refreshToken()) {
-            RequestOptions retryOptions = response.requestOptions;
+            RequestOptions retryOptions = e.requestOptions;
+            const FlutterSecureStorage storage = FlutterSecureStorage();
             String? newAccessToken = await storage.read(key: 'access');
             retryOptions.headers['Authorization'] = 'Bearer $newAccessToken';
 
@@ -44,14 +37,17 @@ class ApiService {
               headers: retryOptions.headers,
             );
 
-            handler.resolve(await _dio.request(retryOptions.path,
-                options: retryDioOptions, data: retryOptions.data));
+            return handler.next((await _dio.request(retryOptions.path,
+                options: retryDioOptions,
+                data: retryOptions.data)) as DioException);
           } else {
             print('Token refresh failed. Logging out...');
+            const FlutterSecureStorage storage = FlutterSecureStorage();
             storage.deleteAll();
           }
         }
-        return handler.next(response);
+
+        return handler.next(e);
       },
     ));
   }
@@ -60,10 +56,9 @@ class ApiService {
     try {
       const FlutterSecureStorage storage = FlutterSecureStorage();
       String? refreshToken = await storage.read(key: 'refresh');
-
       if (refreshToken != null) {
         Response refreshResponse = await _dio.post(
-          '${AppConstants.apiUrl}/token/refresh',
+          '${AppConstants.apiUrl}/authentication/token/refresh/',
           data: {'refresh': refreshToken},
         );
 
@@ -72,7 +67,6 @@ class ApiService {
           await storage.write(key: 'access', value: refreshedTokens['access']);
           await storage.write(
               key: 'refresh', value: refreshedTokens['refresh']);
-          print('Token refresh successful');
           return true;
         }
       }
@@ -80,5 +74,27 @@ class ApiService {
       print('Token refresh error: $error');
     }
     return false;
+  }
+
+  Future<Response> getUserDetails(String customerID) {
+    return dio.get('${AppConstants.apiUrl}/customers/$customerID/');
+  }
+
+  Future<Response> getUserSuperpals(String customerID) {
+    return dio.get('${AppConstants.apiUrl}/superpals/customer/$customerID/');
+  }
+
+  Future<Response> getUserSuperpalsWorkoutRequests(String customerID) {
+    return dio.get(
+        '${AppConstants.apiUrl}/superpals/workout_request/customer/$customerID/');
+  }
+
+  Future<Response> getFilteredWorkouts(String intensity, String difficulty) {
+    return dio.get('${AppConstants.apiUrl}/workouts/',
+        queryParameters: {'intensity': intensity, 'difficulty': difficulty});
+  }
+
+  Future<Response> getCustomersSortedByWorkoutStreak() {
+    return dio.get('${AppConstants.apiUrl}/customers/');
   }
 }

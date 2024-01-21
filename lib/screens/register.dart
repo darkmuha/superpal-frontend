@@ -75,6 +75,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
         imageFile != null;
   }
 
+  List<String> _getEmptyFields() {
+    List<String> emptyFields = [];
+
+    if (firstNameController.text.isEmpty) emptyFields.add("First Name");
+    if (lastNameController.text.isEmpty) emptyFields.add("Last Name");
+    if (emailController.text.isEmpty) emptyFields.add("Email");
+    if (passwordController.text.isEmpty) emptyFields.add("Password");
+    if (weightController.text.isEmpty) emptyFields.add("Weight");
+    if (heightController.text.isEmpty) emptyFields.add("Height");
+    if (ageController.text.isEmpty) emptyFields.add("Age");
+    if (selectedSex == null) emptyFields.add("Sex");
+    if (selectedDifficulty == null) emptyFields.add("Difficulty");
+    if (selectedIntensity == null) emptyFields.add("Intensity");
+    if (selectedGym == null) emptyFields.add("Gym");
+    if (imageFile == null) emptyFields.add("Profile Picture");
+
+    return emptyFields;
+  }
+
   Future<void> _pickImage() async {
     try {
       final imageFile =
@@ -231,7 +250,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
+  void _dismissLoadingDialog() {
+    Get.back();
+  }
+
   Future<void> _register() async {
+    _showLoadingDialog();
+
+    List<String> emptyFields = _getEmptyFields();
+
+    if (emptyFields.isNotEmpty) {
+      String errorMessage =
+          "Please fill in the following fields:\n${emptyFields.join(', ')}";
+      _dismissLoadingDialog();
+      _showErrorDialog(errorMessage);
+
+      return;
+    }
+
     await _uploadImage();
 
     try {
@@ -266,15 +302,69 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (response.statusCode == 201) {
         print('Registration successful');
-        Get.offAllNamed('/');
+        _dismissLoadingDialog();
+        Get.offAllNamed('/login');
       } else {
+        Map<String, dynamic> errorResponse = json.decode(response.body);
+        String errorMessage = errorResponse['detail'] ?? 'Registration failed';
         await _deleteImage();
-        print('Registration failed: ${response.body}');
+        _dismissLoadingDialog();
+        _showErrorDialog(errorMessage);
       }
     } catch (e) {
       await _deleteImage();
+      _dismissLoadingDialog();
       print('Error during registration: $e');
+    } finally {
+      _dismissLoadingDialog();
     }
+  }
+
+  void _showErrorDialog(String errorMessage) {
+    String detailMessage = '';
+    try {
+      Map<String, dynamic> errorData = json.decode(errorMessage);
+      detailMessage = errorData['detail'] ?? '';
+    } catch (e) {
+      detailMessage = errorMessage;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Error'),
+          content: Text(detailMessage),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showLoadingDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 20),
+              Text('Registering...'),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override

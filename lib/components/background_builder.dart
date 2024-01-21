@@ -13,7 +13,7 @@ class BackgroundBuilder extends StatelessWidget {
           decoration: BoxDecoration(
             image: DecorationImage(
               image: AssetImage(imageUrl),
-              fit: BoxFit.cover,
+              fit: BoxFit.fill,
             ),
           ),
         ),
