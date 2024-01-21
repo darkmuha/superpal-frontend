@@ -42,7 +42,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
       },
       child: SvgPicture.asset(
         iconPath,
-        height: 27,
+        height: routeName == '/ranking' ? 30 : 27,
         color: isSelected ? Colors.red : Colors.black,
         fit: BoxFit.scaleDown,
       ),

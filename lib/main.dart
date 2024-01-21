@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
+import 'package:superpal/screens/diet.dart';
+import 'package:superpal/screens/diet/non_vegan.dart';
 import 'package:superpal/screens/ranking_explained.dart';
+import 'package:superpal/screens/diet/vegan.dart';
 import 'helpers/api_requests.dart';
 import 'helpers/api_service.dart';
 
@@ -115,7 +118,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.black,
       ),
-      initialRoute: '/ranking',
+      initialRoute: '/diet',
       getPages: [
         // GetPage(
         //   name: '/',
@@ -165,6 +168,21 @@ class _MyAppState extends State<MyApp> {
         GetPage(
           name: '/rankingExplained',
           page: () => const RankingExplainedScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/diet',
+          page: () => const DietScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/non_vegan',
+          page: () => NonVeganScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/vegan',
+          page: () => VeganScreen(),
           transition: Transition.fadeIn,
         ),
       ],
