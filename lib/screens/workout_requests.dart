@@ -62,7 +62,7 @@ class _WorkoutRequestsScreenState extends State<WorkoutRequestsScreen> {
         }
       } else {
         print('Error: refreshToken is null');
-        Get.toNamed('/welcome');
+        Get.toNamed('/');
       }
     } catch (error) {
       print('Error fetching data: $error');

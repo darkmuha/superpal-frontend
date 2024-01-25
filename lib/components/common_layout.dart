@@ -7,11 +7,15 @@ class CommonLayout extends StatelessWidget {
   final int selectedIndex;
   final Widget body;
   final String? imageUrl;
+  final bool showSettings;
+  final double? rightIconHeight;
 
   const CommonLayout({
     super.key,
     required this.selectedIndex,
     required this.body,
+    this.showSettings = false,
+    this.rightIconHeight,
     this.imageUrl,
   });
 
@@ -24,7 +28,10 @@ class CommonLayout extends StatelessWidget {
             if (imageUrl != null) BackgroundBuilder(imageUrl: imageUrl!),
             Column(
               children: [
-                const CustomAppBar(),
+                CustomAppBar(
+                    showSettings: showSettings,
+                    showAccountButton: !showSettings,
+                    rightIconHeight: rightIconHeight),
                 Expanded(
                   flex: 1,
                   child: body,

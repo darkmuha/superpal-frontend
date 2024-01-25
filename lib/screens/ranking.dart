@@ -100,7 +100,7 @@ class _RankingScreenState extends State<RankingScreen> {
             ),
             const SizedBox(height: 31),
             SizedBox(
-              height: MediaQuery.of(context).size.height * 0.34,
+              height: MediaQuery.of(context).size.height * 0.33,
               child: ListView.builder(
                 itemCount: customers.length,
                 itemBuilder: (context, index) {

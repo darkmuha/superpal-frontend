@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:get/get.dart';
 
 import 'api_service.dart';
 
@@ -174,6 +175,25 @@ class ApiRequests {
     } catch (error) {
       print('Error posting progress: $error');
       return false;
+    }
+  }
+
+  Future<void> postLogOut(
+    String refreshToken,
+  ) async {
+    try {
+      final response = await apiService.postLogOut(refreshToken);
+      print(response);
+      if (response.statusCode == 200) {
+        print('Logout completed successfully');
+        await storage.deleteAll();
+        Get.offAllNamed('/');
+      } else {
+        print(
+            'Error logging out progress: ${response.statusCode} : ${response.data}');
+      }
+    } catch (error) {
+      print('Error logging progress: $error');
     }
   }
 

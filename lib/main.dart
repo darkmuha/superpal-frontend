@@ -7,6 +7,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:superpal/screens/diet.dart';
 import 'package:superpal/screens/diet_screens/non_vegan.dart';
 import 'package:superpal/screens/diet_screens/vegan.dart';
+import 'package:superpal/screens/edit_profile.dart';
 import 'package:superpal/screens/superpals_screens/my_superpals.dart';
 import 'package:superpal/screens/nutrition_screens/amino_acids.dart';
 import 'package:superpal/screens/nutrition_screens/amino_acids_screens/amino_capsules.dart';
@@ -72,7 +73,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     apiRequests = ApiRequests(apiService, storage);
-    checkTokenAndNavigate();
+    // checkTokenAndNavigate();
   }
 
   Future<void> checkTokenAndNavigate() async {
@@ -105,6 +106,7 @@ class _MyAppState extends State<MyApp> {
       return response.statusCode == 200;
     } catch (error) {
       print('Error verifying token: $error');
+      await storage.deleteAll();
       return false;
     }
   }
@@ -150,7 +152,7 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.black,
       ),
-      initialRoute: '/welcome',
+      initialRoute: '/home  ',
       getPages: [
         // GetPage(
         //   name: '/',
@@ -370,6 +372,11 @@ class _MyAppState extends State<MyApp> {
         GetPage(
           name: '/workout_requests',
           page: () => const WorkoutRequestsScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/edit_profile',
+          page: () => const EditProfileScreen(),
           transition: Transition.fadeIn,
         ),
       ],

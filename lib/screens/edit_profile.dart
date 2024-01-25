@@ -2,11 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../components/background_builder.dart';
@@ -14,37 +16,40 @@ import '../components/custom_app_bar.dart';
 import '../components/custom_button.dart';
 import '../components/custom_radio_button.dart';
 import '../components/custom_text_field.dart';
+import '../helpers/api_requests.dart';
+import '../helpers/api_service.dart';
 import '../helpers/constants.dart';
 import '../helpers/enums.dart';
 import '../helpers/image_utils.dart';
 
-class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+class EditProfileScreen extends StatefulWidget {
+  const EditProfileScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
+class _EditProfileScreenState extends State<EditProfileScreen> {
+  final FlutterSecureStorage storage = const FlutterSecureStorage();
+  final ApiService apiService = ApiService();
+  late final ApiRequests apiRequests;
+
   final usernameController = TextEditingController();
   final firstNameController = TextEditingController();
   final lastNameController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  final oldPasswordController = TextEditingController();
+  final newPasswordController = TextEditingController();
+  final reEnteredNewPasswordController = TextEditingController();
   final weightController = TextEditingController();
   final heightController = TextEditingController();
-  final dayController = TextEditingController();
-  final monthController = TextEditingController();
-  final yearController = TextEditingController();
 
   Sex? selectedSex;
-  Difficulty? selectedDifficulty;
-  Intensity? selectedIntensity;
   String? selectedGym;
   String? currentLocation;
   File? imageFile;
   String? imageUrl;
   String? publicImageId;
+  String? customerId;
 
   List<String> nearbyGyms = [];
 
@@ -55,13 +60,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     usernameController.dispose();
     firstNameController.dispose();
     lastNameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
+    oldPasswordController.dispose();
+    newPasswordController.dispose();
+    reEnteredNewPasswordController.dispose();
     weightController.dispose();
     heightController.dispose();
-    dayController.dispose();
-    monthController.dispose();
-    yearController.dispose();
 
     super.dispose();
   }
@@ -69,23 +72,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
-    _getLocationAndGyms();
+    apiRequests = ApiRequests(apiService, storage);
+    _getUserDetails();
+    _getLocationsAndGymsAndUserDetails();
   }
 
   bool _areAllFieldsFilled() {
     return usernameController.text.isNotEmpty &&
         firstNameController.text.isNotEmpty &&
         lastNameController.text.isNotEmpty &&
-        emailController.text.isNotEmpty &&
-        passwordController.text.isNotEmpty &&
+        oldPasswordController.text.isNotEmpty &&
+        newPasswordController.text.isNotEmpty &&
+        reEnteredNewPasswordController.text.isNotEmpty &&
         weightController.text.isNotEmpty &&
         heightController.text.isNotEmpty &&
-        dayController.text.isNotEmpty &&
-        monthController.text.isNotEmpty &&
-        yearController.text.isNotEmpty &&
         selectedSex != null &&
-        selectedDifficulty != null &&
-        selectedIntensity != null &&
         selectedGym != null &&
         imageFile != null;
   }
@@ -95,16 +96,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (firstNameController.text.isEmpty) emptyFields.add("First Name");
     if (lastNameController.text.isEmpty) emptyFields.add("Last Name");
-    if (emailController.text.isEmpty) emptyFields.add("Email");
-    if (passwordController.text.isEmpty) emptyFields.add("Password");
+    if (oldPasswordController.text.isEmpty) emptyFields.add("Email");
+    if (newPasswordController.text.isEmpty) emptyFields.add("Email");
+    if (reEnteredNewPasswordController.text.isEmpty) {
+      emptyFields.add("Password");
+    }
     if (weightController.text.isEmpty) emptyFields.add("Weight");
     if (heightController.text.isEmpty) emptyFields.add("Height");
-    if (dayController.text.isEmpty) emptyFields.add("Day");
-    if (monthController.text.isEmpty) emptyFields.add("Month");
-    if (yearController.text.isEmpty) emptyFields.add("Year");
     if (selectedSex == null) emptyFields.add("Sex");
-    if (selectedDifficulty == null) emptyFields.add("Difficulty");
-    if (selectedIntensity == null) emptyFields.add("Intensity");
     if (selectedGym == null) emptyFields.add("Gym");
     if (imageFile == null) emptyFields.add("Profile Picture");
 
@@ -126,28 +125,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _uploadImage() async {
-    if (_areAllFieldsFilled()) {
-      try {
-        if (imageFile == null) {
-          print('Image file is null. Please select an image.');
-          return;
-        }
-
-        final response = await ImageUtils.uploadImage(
-          cloudinary: cloudinary,
-          imageFile: imageFile!,
-        );
-
-        if (response != null) {
-          setState(() {
-            imageUrl = response;
-          });
-        }
-      } catch (error) {
-        print('Error uploading image: $error');
+    try {
+      if (imageFile == null) {
+        print('Image file is null. Please select an image.');
+        return;
       }
-    } else {
-      print('Please fill in all required fields before uploading the image.');
+
+      final response = await ImageUtils.uploadImage(
+        cloudinary: cloudinary,
+        imageFile: imageFile!,
+      );
+
+      if (response != null) {
+        setState(() {
+          imageUrl = response;
+        });
+      }
+    } catch (error) {
+      print('Error uploading image: $error');
     }
   }
 
@@ -162,9 +157,54 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  Future<void> _getLocationAndGyms() async {
+  Sex _parseSex(String value) {
+    switch (value.toLowerCase()) {
+      case 'male':
+        return Sex.male;
+      case 'medium':
+        return Sex.female;
+      default:
+        print('Error: Unknown sex value: $value');
+        return Sex.male;
+    }
+  }
+
+  Future<void> _getLocationsAndGymsAndUserDetails() async {
     await _requestLocationPermission();
     await _getLocation();
+  }
+
+  Future<void> _getUserDetails() async {
+    try {
+      final refreshToken = await storage.read(key: 'refresh');
+
+      final Map<String, dynamic> decodedToken =
+          JwtDecoder.decode(refreshToken!);
+      customerId = decodedToken['customer_id'];
+
+      await apiRequests.getUserDetails(customerId!);
+
+      final userDetails = await storage.read(key: 'userDetails');
+
+      if (userDetails != null) {
+        Map<String, dynamic> userDetailsJson = jsonDecode(userDetails);
+
+        setState(() {
+          imageUrl = userDetailsJson['profile_picture'];
+          usernameController.text = userDetailsJson['user']['username'];
+          firstNameController.text = userDetailsJson['first_name'];
+          lastNameController.text = userDetailsJson['last_name'];
+          selectedSex = _parseSex(userDetailsJson['sex']);
+          weightController.text = userDetailsJson['weight'];
+          heightController.text = userDetailsJson['height'];
+          selectedGym = userDetailsJson['current_gym'];
+        });
+      } else {
+        print('User details not found.');
+      }
+    } catch (error) {
+      print('Error fetching data: $error');
+    }
   }
 
   Future<void> _requestLocationPermission() async {
@@ -218,7 +258,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       List<String> nearbyGyms = [];
 
+      if (selectedGym != null) {
+        nearbyGyms.insert(0, selectedGym!);
+      }
+
       for (var result in results) {
+        if (selectedGym != null && selectedGym == result['name']) {
+          continue;
+        }
         nearbyGyms.add(result['name']);
       }
 
@@ -234,17 +281,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
     Get.back();
   }
 
-  Future<void> _register() async {
+  Future<void> _updateCustomer() async {
     _showLoadingDialog();
 
-    List<String> emptyFields = _getEmptyFields();
+    bool isAnyPasswordFilled = oldPasswordController.text.isNotEmpty ||
+        newPasswordController.text.isNotEmpty ||
+        reEnteredNewPasswordController.text.isNotEmpty;
 
-    if (emptyFields.isNotEmpty) {
-      String errorMessage =
-          "Please fill in the following fields:\n${emptyFields.join(', ')}";
+    bool areAllPasswordsFilled = oldPasswordController.text.isNotEmpty &&
+        newPasswordController.text.isNotEmpty &&
+        reEnteredNewPasswordController.text.isNotEmpty;
+
+    if (isAnyPasswordFilled && !areAllPasswordsFilled) {
       _dismissLoadingDialog();
-      _showErrorDialog(errorMessage);
-
+      _showErrorDialog(
+          "Please fill in all password fields or leave them all empty.");
       return;
     }
 
@@ -253,9 +304,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       final userData = {
         "user": {
-          "email": emailController.text,
-          "username": usernameController.text,
-          "password": passwordController.text,
+          "old_password": oldPasswordController.text ?? '',
+          "new_password": newPasswordController.text ?? '',
+          "retype_new_password": reEnteredNewPasswordController.text ?? '',
+          "username": usernameController.text
         },
         "first_name": firstNameController.text,
         "last_name": lastNameController.text,
@@ -263,34 +315,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
         "profile_picture": imageUrl,
         "weight": double.parse(weightController.text),
         "height": double.parse(heightController.text),
-        "birthdate": DateTime(
-          int.parse(yearController.text),
-          int.parse(monthController.text),
-          int.parse(dayController.text),
-        ),
-        "workout_selected": null,
-        "workout_streak": 0,
-        "workout_intensity": selectedIntensity?.value,
-        "workout_difficulty": selectedDifficulty?.value,
-        "rank": 1,
         "current_gym": selectedGym ?? "",
         "current_location": currentLocation ?? "City, Country",
-        "is_admin": "False",
       };
 
-      final response = await http.post(
-        Uri.parse('${AppConstants.apiUrl}/authentication/register/'),
+      final response = await http.put(
+        Uri.parse('${AppConstants.apiUrl}/customers/$customerId/'),
         body: json.encode(userData),
         headers: {'Content-Type': 'application/json'},
       );
 
       if (response.statusCode == 201) {
-        print('Registration successful');
+        print('User Update Successful');
         _dismissLoadingDialog();
-        Get.offAllNamed('/login');
+        Get.offAllNamed('/account');
       } else {
         Map<String, dynamic> errorResponse = json.decode(response.body);
-        String errorMessage = errorResponse['detail'] ?? 'Registration failed';
+        String errorMessage = errorResponse['detail'] ?? 'Updating user failed';
         await _deleteImage();
         _dismissLoadingDialog();
         _showErrorDialog(errorMessage);
@@ -298,7 +339,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     } catch (e) {
       await _deleteImage();
       _dismissLoadingDialog();
-      print('Error during registration: $e');
+      print('Error during updating user: $e');
     } finally {
       _dismissLoadingDialog();
     }
@@ -361,14 +402,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const BackgroundBuilder(
               imageUrl: "assets/images/barbell_cropped.png",
             ),
-            Transform.translate(
-              offset: const Offset(0.0, -20.0),
-              // Adjust the values according to your needs
-              child: const Align(
-                alignment: Alignment.topCenter,
-                child: CustomAppBar(
-                  showAccountButton: false,
-                ),
+            const Align(
+              alignment: Alignment.topCenter,
+              child: CustomAppBar(
+                showAccountButton: false,
               ),
             ),
             Center(
@@ -377,7 +414,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 50),
+                    const SizedBox(height: 90),
                     Center(
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
@@ -405,13 +442,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                             fit: BoxFit.cover,
                                           ),
                                         )
-                                      : null,
+                                      : imageUrl != null
+                                          ? ClipOval(
+                                              child: Image.network(
+                                                imageUrl!,
+                                                width: 70,
+                                                height: 70,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            )
+                                          : null,
                                 ),
                                 IconButton(
                                   onPressed: () {
                                     _pickImage();
                                   },
-                                  icon: imageFile != null
+                                  icon: (imageFile != null || imageUrl != null)
                                       ? Container()
                                       : SvgPicture.asset(
                                           "assets/icons/camera.svg",
@@ -442,7 +488,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 50),
                     Center(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -471,19 +517,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ],
                       ),
                     ),
+                    SizedBox(height: 20),
                     CustomTextField(
                       controller: usernameController,
                       hintText: "USERNAME",
                       fontSize: 15,
                     ),
                     CustomTextField(
-                      controller: emailController,
-                      hintText: "EMAIL",
+                      controller: oldPasswordController,
+                      hintText: "OLD PASSWORD",
                       fontSize: 15,
+                      obscureText: true,
                     ),
                     CustomTextField(
-                      controller: passwordController,
-                      hintText: "PASSWORD",
+                      controller: newPasswordController,
+                      hintText: "NEW PASSWORD",
+                      fontSize: 15,
+                      obscureText: true,
+                    ),
+                    CustomTextField(
+                      controller: reEnteredNewPasswordController,
+                      hintText: "RE-ENTERED NEW PASSWORD",
                       fontSize: 15,
                       obscureText: true,
                     ),
@@ -495,6 +549,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         fontSize: 9,
                       ),
                     ),
+                    SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -505,7 +560,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             fontSize: 19,
                           ),
                         ),
-                        SizedBox(width: 65),
+                        const SizedBox(width: 65),
                         IntrinsicWidth(
                           child: CustomTextField(
                             controller: heightController,
@@ -515,131 +570,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ],
                     ),
-                    Transform.translate(
-                      offset: Offset(0.0, 20.0),
-                      child: const Text(
-                        'ENTER YOUR BIRTHDATE',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                        ),
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        IntrinsicWidth(
-                          child: CustomTextField(
-                            controller: dayController,
-                            hintText: "DAY",
-                            fontSize: 19,
-                          ),
-                        ),
-                        IntrinsicWidth(
-                          child: CustomTextField(
-                            controller: monthController,
-                            hintText: "MONTH",
-                            fontSize: 19,
-                          ),
-                        ),
-                        IntrinsicWidth(
-                          child: CustomTextField(
-                            controller: yearController,
-                            hintText: "YEAR",
-                            fontSize: 19,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 14),
-                    const Text(
-                      'SELECT YOUR DIFFICULTY',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        CustomRadioButton(
-                          selected: selectedDifficulty == Difficulty.beginner,
-                          onChanged: (isSelected) {
-                            setState(() {
-                              selectedDifficulty =
-                                  isSelected! ? Difficulty.beginner : null;
-                            });
-                          },
-                          text: 'BEGINNER',
-                        ),
-                        CustomRadioButton(
-                          selected:
-                              selectedDifficulty == Difficulty.intermediate,
-                          onChanged: (isSelected) {
-                            setState(() {
-                              selectedDifficulty =
-                                  isSelected! ? Difficulty.intermediate : null;
-                            });
-                          },
-                          text: 'INTERMEDIATE',
-                        ),
-                        CustomRadioButton(
-                          selected: selectedDifficulty == Difficulty.pro,
-                          onChanged: (isSelected) {
-                            setState(() {
-                              selectedDifficulty =
-                                  isSelected! ? Difficulty.pro : null;
-                            });
-                          },
-                          text: 'PRO',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    const Text(
-                      'SELECT YOUR INTENSITY',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 17,
-                      ),
-                    ),
-                    const SizedBox(height: 5),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        CustomRadioButton(
-                          selected: selectedIntensity == Intensity.low,
-                          onChanged: (isSelected) {
-                            setState(() {
-                              selectedIntensity =
-                                  isSelected! ? Intensity.low : null;
-                            });
-                          },
-                          text: 'LOW',
-                        ),
-                        CustomRadioButton(
-                          selected: selectedIntensity == Intensity.medium,
-                          onChanged: (isSelected) {
-                            setState(() {
-                              selectedIntensity =
-                                  isSelected! ? Intensity.medium : null;
-                            });
-                          },
-                          text: 'MEDIUM',
-                        ),
-                        CustomRadioButton(
-                          selected: selectedIntensity == Intensity.high,
-                          onChanged: (isSelected) {
-                            setState(() {
-                              selectedIntensity =
-                                  isSelected! ? Intensity.high : null;
-                            });
-                          },
-                          text: 'HIGH',
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
+                    const SizedBox(height: 30),
                     const Text(
                       'SELECT THE GYM YOU GO',
                       style: TextStyle(
@@ -648,7 +579,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     SizedBox(
-                      height: 60,
+                      height: 90,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: ListView.builder(
@@ -675,9 +606,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     CustomButton(
                       onTap: () {
-                        _register();
+                        _updateCustomer();
                       },
-                      buttonText: 'JOIN',
+                      buttonText: 'UPDATE',
                     ),
                   ],
                 ),

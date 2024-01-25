@@ -48,7 +48,7 @@ class ApiService {
             print('Token refresh failed. Logging out...');
             const FlutterSecureStorage storage = FlutterSecureStorage();
             await storage.deleteAll();
-            GET.Get.toNamed('/welcome');
+            GET.Get.toNamed('/');
           }
         }
 
@@ -75,7 +75,7 @@ class ApiService {
           return true;
         }
       } else {
-        GET.Get.toNamed('/welcome');
+        GET.Get.toNamed('/');
       }
     } catch (error) {
       print('Token refresh error: $error');
@@ -130,6 +130,17 @@ class ApiService {
       data: {
         'user': customerID,
         'progress_image': progressImage,
+      },
+    );
+  }
+
+  Future<Response> postLogOut(
+    String refreshToken,
+  ) {
+    return dio.post(
+      '${AppConstants.apiUrl}/authentication/logout/',
+      data: {
+        'refresh': refreshToken,
       },
     );
   }

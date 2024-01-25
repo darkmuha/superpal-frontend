@@ -210,9 +210,11 @@ class _AccountScreenState extends State<AccountScreen> {
   @override
   Widget build(BuildContext context) {
     return CommonLayout(
+      showSettings: true,
       selectedIndex: 5,
       body: buildBody(context),
       imageUrl: "assets/images/account_background_cropped.png",
+      rightIconHeight: 41,
     );
   }
 

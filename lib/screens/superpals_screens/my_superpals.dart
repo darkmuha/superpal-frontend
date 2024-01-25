@@ -50,7 +50,7 @@ class _MySuperPalsScreenState extends State<MySuperPalsScreen> {
         }
       } else {
         print('Error: refreshToken is null');
-        Get.toNamed('/welcome');
+        Get.toNamed('/');
       }
     } catch (error) {
       print('Error fetching data: $error');

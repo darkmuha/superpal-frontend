@@ -28,12 +28,12 @@ class CustomRadioButton extends StatelessWidget {
         onChanged(!selected);
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 18),
+        padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 10),
         decoration: BoxDecoration(
           color: (selected && highlight == 2)
               ? Colors.black.withOpacity(0.7)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(41.0), // Add round edges here
+          borderRadius: BorderRadius.circular(41.0),
         ),
         child: Row(
           children: [
