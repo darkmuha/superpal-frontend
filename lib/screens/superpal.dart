@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../components/common_layout.dart';
 import '../components/custom_button_with_picture_variant.dart';
 
@@ -32,13 +33,16 @@ class SuperPalScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 36),
-          const CustomButtonWithPictureVariant(
+          CustomButtonWithPictureVariant(
             imageUrl: 'assets/images/my_superpals_cropped.jpg',
             title: 'MY SUPERPALS',
             text: 'See your SuperPals, Plan a Workout',
             titleFontSize: 28,
             textFontSize: 14,
             crossAxisAlignment: CrossAxisAlignment.center,
+            onTap: () {
+              Get.toNamed('/my_superpals');
+            },
           ),
           const SizedBox(height: 34),
           const CustomButtonWithPictureVariant(

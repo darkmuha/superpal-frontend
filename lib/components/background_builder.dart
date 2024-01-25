@@ -23,8 +23,8 @@ class BackgroundBuilder extends StatelessWidget {
               begin: FractionalOffset.topCenter,
               end: FractionalOffset.bottomCenter,
               colors: [
-                Colors.black.withOpacity(0.6),
-                Colors.black.withOpacity(0.6),
+                Colors.black.withOpacity(0.5),
+                Colors.black.withOpacity(0.5),
               ],
             ),
           ),

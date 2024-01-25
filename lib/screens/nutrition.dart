@@ -33,15 +33,18 @@ class NutritionScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 27),
-          const CustomButtonWithPictureVariant(
+          CustomButtonWithPictureVariant(
             imageUrl: 'assets/images/nutrition_nutrition_cropped.jpg',
             title: 'NUTRITION',
             text: 'You can’t escape from the reality of vitamins ',
             titleFontSize: 28,
             textFontSize: 14,
             crossAxisAlignment: CrossAxisAlignment.center,
-            backgroundColor: Color(0xFF5A544F),
+            backgroundColor: const Color(0xFF5A544F),
             backgroundColorAlpha: 200,
+            onTap: () {
+              Get.toNamed('/supplements');
+            },
           ),
           const SizedBox(height: 34),
           CustomButtonWithPictureVariant(

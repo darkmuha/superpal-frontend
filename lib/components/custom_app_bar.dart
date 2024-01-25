@@ -7,13 +7,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool showAccountButton;
 
   const CustomAppBar({
-    Key? key,
+    super.key,
     this.showBackButton = true,
     this.showAccountButton = true,
-  }) : super(key: key);
+  });
 
   @override
-  Size get preferredSize => Size.fromHeight(80.0);
+  Size get preferredSize => const Size.fromHeight(80.0);
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       title: Padding(
-        padding: const EdgeInsets.only(top: 45.0, right: 35, left: 35),
+        padding: const EdgeInsets.only(top: 45.0, right: 25, left: 25),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

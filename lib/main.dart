@@ -5,9 +5,40 @@ import 'package:get/get.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:superpal/screens/diet.dart';
-import 'package:superpal/screens/diet/non_vegan.dart';
+import 'package:superpal/screens/diet_screens/non_vegan.dart';
+import 'package:superpal/screens/diet_screens/vegan.dart';
+import 'package:superpal/screens/superpals_screens/my_superpals.dart';
+import 'package:superpal/screens/nutrition_screens/amino_acids.dart';
+import 'package:superpal/screens/nutrition_screens/amino_acids_screens/amino_capsules.dart';
+import 'package:superpal/screens/nutrition_screens/amino_acids_screens/aol.dart';
+import 'package:superpal/screens/nutrition_screens/amino_acids_screens/argininie.dart';
+import 'package:superpal/screens/nutrition_screens/amino_acids_screens/bcaa.dart';
+import 'package:superpal/screens/nutrition_screens/amino_acids_screens/glutamine.dart';
+import 'package:superpal/screens/nutrition_screens/amino_acids_screens/zma.dart';
+import 'package:superpal/screens/nutrition_screens/fat_burners.dart';
+import 'package:superpal/screens/nutrition_screens/fat_burners_screens/carnitine_capsules.dart';
+import 'package:superpal/screens/nutrition_screens/fat_burners_screens/carnitine_shot.dart';
+import 'package:superpal/screens/nutrition_screens/fat_burners_screens/cla.dart';
+import 'package:superpal/screens/nutrition_screens/performance_power.dart';
+import 'package:superpal/screens/nutrition_screens/performance_power_screens/caffeine.dart';
+import 'package:superpal/screens/nutrition_screens/performance_power_screens/citrulline.dart';
+import 'package:superpal/screens/nutrition_screens/performance_power_screens/creatine.dart';
+import 'package:superpal/screens/nutrition_screens/performance_power_screens/pre_workout.dart';
+import 'package:superpal/screens/nutrition_screens/performance_power_screens/tribulus.dart';
+import 'package:superpal/screens/nutrition_screens/protein_powders.dart';
+import 'package:superpal/screens/nutrition_screens/protein_powders_screens/beef_protein.dart';
+import 'package:superpal/screens/nutrition_screens/protein_powders_screens/casein.dart';
+import 'package:superpal/screens/nutrition_screens/protein_powders_screens/vegan_protein.dart';
+import 'package:superpal/screens/nutrition_screens/protein_powders_screens/whey.dart';
+import 'package:superpal/screens/nutrition_screens/protein_powders_screens/whey_isolate.dart';
+import 'package:superpal/screens/nutrition_screens/supplements.dart';
+import 'package:superpal/screens/nutrition_screens/weight_and_volume.dart';
+import 'package:superpal/screens/nutrition_screens/weight_and_volume_screens/gainer.dart';
 import 'package:superpal/screens/ranking_explained.dart';
-import 'package:superpal/screens/diet/vegan.dart';
+import 'package:superpal/screens/superpals_screens/workout_planning_success.dart';
+import 'package:superpal/screens/superpals_screens/workout_planning.dart';
+import 'package:superpal/screens/welcome.dart';
+import 'package:superpal/screens/workout_requests.dart';
 import 'helpers/api_requests.dart';
 import 'helpers/api_service.dart';
 
@@ -20,7 +51,6 @@ import 'screens/nutrition.dart';
 import 'screens/ranking.dart';
 import 'screens/superpal.dart';
 import 'screens/workout.dart';
-import 'screens/welcome.dart';
 
 void main() {
   runApp(const MyApp());
@@ -42,7 +72,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     apiRequests = ApiRequests(apiService, storage);
-    // checkTokenAndNavigate();
+    checkTokenAndNavigate();
   }
 
   Future<void> checkTokenAndNavigate() async {
@@ -100,7 +130,9 @@ class _MyAppState extends State<MyApp> {
         await apiRequests.getFilteredWorkouts(intensity, difficulty);
 
         await apiRequests.getUserSuperpals(customerID);
-        await apiRequests.getUserSuperpalsWorkoutRequests(customerID);
+        await apiRequests.getUserSuperpalsWorkoutRequests(
+          customerID,
+        );
         await apiRequests.getCustomersSortedByWorkoutStreak();
 
         Get.offAllNamed('/home');
@@ -118,13 +150,18 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         scaffoldBackgroundColor: Colors.black,
       ),
-      initialRoute: '/diet',
+      initialRoute: '/welcome',
       getPages: [
         // GetPage(
         //   name: '/',
         //   page: () => const WelcomeScreen(),
         //   transition: Transition.fadeIn,
         // ),
+        GetPage(
+          name: '/welcome',
+          page: () => const WelcomeScreen(),
+          transition: Transition.fadeIn,
+        ),
         GetPage(
           name: '/register',
           page: () => const RegisterScreen(),
@@ -177,12 +214,162 @@ class _MyAppState extends State<MyApp> {
         ),
         GetPage(
           name: '/non_vegan',
-          page: () => NonVeganScreen(),
+          page: () => const NonVeganScreen(),
           transition: Transition.fadeIn,
         ),
         GetPage(
           name: '/vegan',
-          page: () => VeganScreen(),
+          page: () => const VeganScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/supplements',
+          page: () => const SupplementsScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/performance_power',
+          page: () => const PerformancePowerScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/pre_workout',
+          page: () => const PreWorkoutScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/citrulline',
+          page: () => const CitrullineScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/creatine',
+          page: () => const CreatineScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/tribulus',
+          page: () => const TribulusScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/caffeine',
+          page: () => const CaffeineScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/fat_burners',
+          page: () => const FatBurnersScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/cla',
+          page: () => const CLAScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/carnitine_capsules',
+          page: () => const CarnitineCapsulesScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/carnitine_shot',
+          page: () => const CarnitineShotScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/weight_and_volume',
+          page: () => const WeightAndVolumeScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/gainer',
+          page: () => const GainerScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/amino_acids',
+          page: () => const AminoAcidsScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/bcaa',
+          page: () => const BCAAScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/glutamine',
+          page: () => const GlutamineScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/argininie',
+          page: () => const ArgininieScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/amino_capsules',
+          page: () => const AminoCapsulesScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/aol',
+          page: () => const AOLScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/zma',
+          page: () => const ZMAScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/protein_powders',
+          page: () => const ProteinPowdersScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/whey',
+          page: () => const WheyScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/whey_isolate',
+          page: () => const WheyIsolateScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/casein',
+          page: () => const CaseinScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/beef_protein',
+          page: () => const BeefProteinScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/vegan_protein',
+          page: () => const VeganProteinScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/my_superpals',
+          page: () => const MySuperPalsScreen(),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/workout_planning',
+          page: () => WorkoutPlanningScreen(superPal: Get.arguments),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/workout_planning_success',
+          page: () => WorkoutPlanningSuccessScreen(superPal: Get.arguments),
+          transition: Transition.fadeIn,
+        ),
+        GetPage(
+          name: '/workout_requests',
+          page: () => const WorkoutRequestsScreen(),
           transition: Transition.fadeIn,
         ),
       ],

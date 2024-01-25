@@ -41,15 +41,39 @@ class ApiRequests {
     }
   }
 
-  Future<void> getUserSuperpalsWorkoutRequests(String customerID) async {
+  Future<void> getUserSuperpalsWorkoutRequests(
+    String customerID, {
+    String status = '',
+  }) async {
     try {
       final superpalsWorkoutRequestsResponse =
-          await apiService.getUserSuperpalsWorkoutRequests(customerID);
+          await apiService.getUserSuperpalsWorkoutRequests(customerID, status);
 
       if (superpalsWorkoutRequestsResponse.statusCode == 200) {
         final workoutRequests = superpalsWorkoutRequestsResponse.data;
-        // print('User superpals workout requests: $workoutRequests');
-        await saveSecurelyList('superpals_requests', workoutRequests);
+        // print('User superpals workout requests for $status: $workoutRequests');
+        await saveSecurelyList('workout_requests', workoutRequests);
+      } else {
+        print(
+            'Error fetching user superpals requests: ${superpalsWorkoutRequestsResponse.statusCode}');
+      }
+    } catch (error) {
+      print('Error fetching user superpals requests: $error');
+    }
+  }
+
+  Future<void> updateUserSuperpalsWorkoutRequests(
+    String request_id, {
+    String status = '',
+  }) async {
+    try {
+      final superpalsWorkoutRequestsResponse = await apiService
+          .updateUserSuperpalsWorkoutRequests(request_id, status);
+
+      if (superpalsWorkoutRequestsResponse.statusCode == 200) {
+        final workoutRequests = superpalsWorkoutRequestsResponse.data;
+        // print('User superpals workout requests for $status: $workoutRequests');
+        await saveSecurelyList('workout_requests', workoutRequests);
       } else {
         print(
             'Error fetching user superpals requests: ${superpalsWorkoutRequestsResponse.statusCode}');
@@ -77,7 +101,10 @@ class ApiRequests {
     }
   }
 
-  Future<void> getFilteredWorkouts(String intensity, String difficulty) async {
+  Future<void> getFilteredWorkouts(
+    String intensity,
+    String difficulty,
+  ) async {
     try {
       final filteredWorkoutsResponse =
           await apiService.getFilteredWorkouts(intensity, difficulty);
@@ -92,6 +119,83 @@ class ApiRequests {
       }
     } catch (error) {
       print('Error fetching filtered workouts: $error');
+    }
+  }
+
+  Future<void> getProgress(String customerID) async {
+    try {
+      final progressResponse = await apiService.getProgress(customerID);
+
+      if (progressResponse.statusCode == 200) {
+        final progress = progressResponse.data;
+        // print('progress: $progress');
+        await saveSecurelyList('progress', progress);
+      } else {
+        print('Error fetching progress: ${progressResponse.statusCode}');
+      }
+    } catch (error) {
+      print('Error fetching progress: $error');
+    }
+  }
+
+  Future<void> postProgress(
+    String customerID,
+    String progressImage,
+  ) async {
+    try {
+      final response = await apiService.postProgress(customerID, progressImage);
+
+      if (response.statusCode == 201) {
+        print('Progress posted successfully');
+      } else {
+        print('Error posting progress: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error posting progress: $error');
+    }
+  }
+
+  Future<bool> postWorkoutRequest(
+    String customerID,
+    String superPalID,
+    String workoutTime,
+  ) async {
+    try {
+      final response = await apiService.postWorkoutRequest(
+          customerID, superPalID, workoutTime);
+
+      if (response.statusCode == 201) {
+        print('Progress posted successfully');
+        return true;
+      } else {
+        print('Error posting progress: ${response.statusCode}');
+        return false;
+      }
+    } catch (error) {
+      print('Error posting progress: $error');
+      return false;
+    }
+  }
+
+  Future<void> updateCustomer({
+    required String customerID,
+    String? intensity,
+    String? difficulty,
+  }) async {
+    try {
+      final response = await apiService.updateCustomer(
+        customerID,
+        intensity: intensity,
+        difficulty: difficulty,
+      );
+
+      if (response.statusCode == 200) {
+        print('Customer updated successfully');
+      } else {
+        print('Error updating customer: ${response.statusCode}');
+      }
+    } catch (error) {
+      print('Error updating customer: $error');
     }
   }
 

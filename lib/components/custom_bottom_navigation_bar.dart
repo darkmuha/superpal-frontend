@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 class CustomBottomNavigationBar extends StatelessWidget {
   final int selectedIndex;
 
-  const CustomBottomNavigationBar({
+  const CustomBottomNavigationBar({super.key, 
     required this.selectedIndex,
   });
 

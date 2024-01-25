@@ -8,16 +8,18 @@ class CustomRadioButton extends StatelessWidget {
   final String text;
   final double? iconSize;
   final double? fontSize;
+  final int highlight;
 
   const CustomRadioButton({
-    Key? key,
+    super.key,
     required this.selected,
     required this.onChanged,
     required this.text,
     this.svgAssetPath,
     this.iconSize,
     this.fontSize,
-  }) : super(key: key);
+    this.highlight = 1,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,26 +27,37 @@ class CustomRadioButton extends StatelessWidget {
       onTap: () {
         onChanged(!selected);
       },
-      child: Row(
-        children: [
-          if (svgAssetPath != null && svgAssetPath!.isNotEmpty)
-            SvgPicture.asset(
-              svgAssetPath!,
-              width: iconSize ?? 21.0,
-              height: iconSize ?? 21.0,
-              color: selected ? const Color(0xFFFF9D00) : Colors.white,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 3, horizontal: 18),
+        decoration: BoxDecoration(
+          color: (selected && highlight == 2)
+              ? Colors.black.withOpacity(0.7)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(41.0), // Add round edges here
+        ),
+        child: Row(
+          children: [
+            if (svgAssetPath != null && svgAssetPath!.isNotEmpty)
+              SvgPicture.asset(
+                svgAssetPath!,
+                width: iconSize ?? 21.0,
+                height: iconSize ?? 21.0,
+                color: selected ? const Color(0xFFFF9D00) : Colors.white,
+              ),
+            if (svgAssetPath != null && svgAssetPath!.isNotEmpty)
+              const SizedBox(width: 8.0),
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: fontSize ?? 19.0,
+                color: (selected && highlight == 1)
+                    ? const Color(0xFFFF9D00)
+                    : Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          if (svgAssetPath != null && svgAssetPath!.isNotEmpty)
-            const SizedBox(width: 8.0),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: fontSize ?? 19.0,
-              color: selected ? const Color(0xFFFF9D00) : Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

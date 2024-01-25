@@ -1,17 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:cloudinary/cloudinary.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:image/image.dart' as img;
 
 import '../components/background_builder.dart';
 import '../components/custom_app_bar.dart';
@@ -20,6 +16,7 @@ import '../components/custom_radio_button.dart';
 import '../components/custom_text_field.dart';
 import '../helpers/constants.dart';
 import '../helpers/enums.dart';
+import '../helpers/image_utils.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -39,8 +36,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Sex? selectedSex;
   Difficulty? selectedDifficulty;
-  String? selectedGym;
   Intensity? selectedIntensity;
+  String? selectedGym;
   String? currentLocation;
   File? imageFile;
   String? imageUrl;
@@ -48,11 +45,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   List<String> nearbyGyms = [];
 
-  final cloudinary = Cloudinary.signedConfig(
-    apiKey: '894995559279246',
-    apiSecret: 'CK9axl5nMdjHfVV_o6XAOpxzerU',
-    cloudName: 'decb8gydy',
-  );
+  final cloudinary = AppConstants.cloudinary;
 
   @override
   void initState() {
@@ -96,27 +89,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _pickImage() async {
     try {
-      final imageFile =
-          await ImagePicker().pickImage(source: ImageSource.gallery);
-      if (imageFile == null) return;
-      final imageTemp = File(imageFile.path);
-      setState(() => this.imageFile = imageTemp);
-    } on PlatformException catch (e) {
-      print('Failed to pick image: $e');
+      final pickedImage = await ImageUtils.pickImage();
+      if (pickedImage == null) return;
+      final compressedImage = await ImageUtils.compressImage(pickedImage);
+
+      setState(() {
+        imageFile = compressedImage;
+      });
+    } catch (e) {
+      print('Failed to pick or compress image: $e');
     }
-  }
-
-  Future<File> _compressImage(File imageFile) async {
-    final image = img.decodeImage(imageFile.readAsBytesSync());
-
-    final resizedImage = img.copyResize(image!, width: 400);
-
-    final compressedImage = img.encodeJpg(resizedImage!, quality: 90);
-
-    final compressedImageFile = File('${imageFile.path}_compressed.jpg');
-    await compressedImageFile.writeAsBytes(compressedImage);
-
-    return compressedImageFile;
   }
 
   Future<void> _uploadImage() async {
@@ -126,26 +108,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
           print('Image file is null. Please select an image.');
           return;
         }
-        final compressedImageFile = await _compressImage(imageFile!);
 
-        final response = await cloudinary.unsignedUpload(
-          file: imageFile!.path,
-          uploadPreset: 'superpal',
-          fileBytes: compressedImageFile.readAsBytesSync(),
-          resourceType: CloudinaryResourceType.image,
-          progressCallback: (count, total) {
-            print('Uploading image with progress: $count/$total');
-          },
+        final response = await ImageUtils.uploadImage(
+          cloudinary: cloudinary,
+          imageFile: imageFile!,
         );
 
-        if (response.isSuccessful) {
-          print('Get your image from: ${response.secureUrl}');
+        if (response != null) {
           setState(() {
-            imageUrl = response.secureUrl;
-            publicImageId = response.publicId;
+            imageUrl = response;
           });
-        } else {
-          print('Error uploading image. Please check Cloudinary setup.');
         }
       } catch (error) {
         print('Error uploading image: $error');
@@ -157,26 +129,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _deleteImage() async {
     try {
-      if (imageUrl == null || imageUrl!.isEmpty) {
-        print('Image URL is empty. Cannot delete.');
-        return;
-      }
-
-      final response = await cloudinary.destroy(
-        publicImageId,
-        resourceType: CloudinaryResourceType.image,
-        invalidate: false,
+      await ImageUtils.deleteImage(
+        cloudinary: cloudinary,
+        publicImageId: publicImageId,
       );
-
-      if (response.isSuccessful) {
-        print('Image deleted successfully');
-        setState(() {
-          imageUrl = null;
-          publicImageId = null;
-        });
-      } else {
-        print('Error deleting image. Please check Cloudinary setup.');
-      }
     } catch (error) {
       print('Error deleting image: $error');
     }

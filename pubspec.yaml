@@ -48,6 +48,8 @@ dependencies:
   geocoding:
   cloudinary:
   image:
+  photo_view:
+  intl:
 
 dev_dependencies:
   flutter_test:
